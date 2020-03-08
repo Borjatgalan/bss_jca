@@ -31,7 +31,7 @@ public class Options implements Serializable {
 	
 	/**
 	 * Constantes que representan las diferentes operaciones criptograficas aplicables a un objeto:
-	 * -Cifrado sim�trico
+	 * -Cifrado simetrico
 	 * -Hash/Mac
 	 * -Cifrado de clave publica
 	 * -Firma digital
