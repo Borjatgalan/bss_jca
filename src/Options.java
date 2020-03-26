@@ -89,8 +89,8 @@ public class Options implements Serializable {
 	 * @return nueva instancia de <code>Options</code> con valores por defecto
 	 */
 	public Options() {
-		setSymmetricalCipher(symmetricalAlgorithms[0]);
-		setAuthenticator(hashmacAlgorithms[0]); 
+		setSymmetricalCipher(symmetricalAlgorithms[1]);
+		setAuthenticator(hashmacAlgorithms[1]); 
 	}
 	
 	/**

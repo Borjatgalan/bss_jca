@@ -40,7 +40,7 @@ public class Header {
 	public Header() {
 		algorithm1 = Options.cipherAlgorithms[1];
 		algorithm2 = Options.authenticationAlgorithms[1];
-		operation = Options.OP_NONE;
+		operation = Options.OP_SYMMETRIC_CIPHER;
 		data = new byte[] { 0x7d, 0x60, 0x43, 0x5f, 0x02, 0x09, 0x0f, 0x0a };
 	}
 
@@ -58,7 +58,11 @@ public class Header {
 		this.algorithm2 = algorithm2;
 		this.data = data;
 	}
-
+	public Header(String algorithm1, byte[] data) {
+		this.algorithm1 = algorithm1;
+		this.data = data;
+	}
+	
 	public byte getOperation() {
 		return operation;
 	}
