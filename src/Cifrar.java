@@ -27,13 +27,13 @@ public class Cifrar {
 	
 	/* Constructor por defecto de Cifrar */
 	public Cifrar() {
-		this.salt = generateRandomSalt(64);
+		this.salt = generateRandomSalt(8);
 		this.count = 1024;
 	}
 	/**
 	 * Generador de datos aleatorios
 	 * @param size tamano de la estructura
-	 * @return estructura de datos aleatorios
+	 * @return estructura de datos aleatorios tipo byte []
 	 */
 	public static byte[] generateRandomSalt(int size) {
 		if (size < 6 || size > 1024) {
@@ -51,11 +51,20 @@ public class Cifrar {
 	 * @return devuelve una clave tipo SecretKey
 	 */
 	private SecretKey generarClaves(String algorithm, char[] passwd) {
+		Boolean generada=false;
+		SecretKey skeygenerada = null;
 		try {
+			if(!generada) {
 			PBEKeySpec pbeKeySpec = new PBEKeySpec(passwd);
 			SecretKeyFactory kf = SecretKeyFactory.getInstance(algorithm);
 			SecretKey skey = kf.generateSecret(pbeKeySpec);
+			skeygenerada=skey;
+			generada=true;
 			return skey;
+			}
+			else {
+				return skeygenerada;
+			}
 		} catch (Exception localException) {
 			localException.printStackTrace();
 		}
@@ -76,32 +85,38 @@ public class Cifrar {
 			FileInputStream fileIn = new FileInputStream(file);
 			FileOutputStream fileOut = new FileOutputStream(file + ".cif");
 			/* Creacion de instancia Header */
-			Header header = new Header(algorithm, salt);
-			/* Escritura de la cabecera del fichero */
-			header.save(fileOut);
+			Header header = new Header(algorithm, this.salt);
 
 			/* Creacion del Cipher */
 			Cipher cipher = Cipher.getInstance(algorithm);
+			
 			/* Generacion de la clave */
 			SecretKey secretKey = generarClaves(algorithm, passwd);
 			/* Obtenemos los parametros PBE */
-			PBEParameterSpec pPS = new PBEParameterSpec(salt, count);
+			PBEParameterSpec pPS = new PBEParameterSpec(salt, this.count);
 			cipher.init(Cipher.ENCRYPT_MODE, secretKey, pPS);
 			CipherOutputStream cos = new CipherOutputStream(fileOut, cipher);
 			int i = 0;
-			byte[] array = new byte[1024];
+			byte[] array = new byte[8];
 			/*
 			 * Nos permitirán cifrar/descifrar un flujo de datos con el Cipher anterior. 
 			 * Una vez preparado, podremos leer o escribir en el flujo y al mismo tiempo 
 			 * se iran cifrando o descifrando los datos
 			 */
+			
+			/* Escritura de la cabecera del fichero */
+			header.save(fileOut);
+		
+			
 			while ((i = fileIn.read(array)) != -1) {
 				cos.write(array, 0, i);
 			}
-			cos.flush();
-			cos.close();
+			
 			/* Cierre de flujos */
+			cos.close();
+			
 			fileOut.close();
+			fileOut.flush();
 			fileIn.close();
 			cifrado = true;
 		} catch (FileNotFoundException FileNotFoundException) {
@@ -123,25 +138,32 @@ public class Cifrar {
 	public final Boolean descifrar(String file, char[] passwd, String algorithm) {
 		Boolean descifrado = false;
 		try {
-			System.out.println("Proceso de descifrado de <" + file + "> con: " + algorithm + "\n");
+			System.out.println("Proceso de descifrado de <" + file + ">\n");
 			/* Flujos de lectura y escritura */
 			FileInputStream fileIn = new FileInputStream(file);
 			FileOutputStream ficherOut = new FileOutputStream(file + ".cla");
+			
 			/* Creacion de instancia Header */
-			Header header = new Header(algorithm, salt);
+			Header header = new Header();
+			
 			/* Lectura de la cabecera del fichero */
 			header.load(fileIn);
-			/* Cifrar */
-			Cipher cipher = Cipher.getInstance(algorithm);
-			/* Creacion de la clave */
-			SecretKey secretKey = generarClaves(algorithm, passwd);
+			algorithm=header.getAlgorithm1();
+			salt=header.getData();
+			
+			/*getInstance de Cipher */
+			Cipher cipher = Cipher.getInstance(header.getAlgorithm1());
+			
+			/* Obtencion de la clave */
+			SecretKey secretKey = generarClaves(header.getAlgorithm1(), passwd);
 			/* Parametros PBE  */
-			PBEParameterSpec pPS = new PBEParameterSpec(salt, count);
+			
+			PBEParameterSpec pPS = new PBEParameterSpec(header.getData(), this.count);
 			cipher.init(Cipher.DECRYPT_MODE, secretKey, pPS);
 			CipherInputStream cis = new CipherInputStream(fileIn, cipher);
-			byte[] array = new byte[1024];
+			byte[] array = new byte[8];
 			int i;
-			/* Lectura del fichero y muestra por pantalla de los bloques obtenidos */
+			/* Escritura del fichero de los bloques obtenidos */
 			while ((i = cis.read(array)) != -1) {
 				ficherOut.write(array, 0, i);
 			}
@@ -154,8 +176,8 @@ public class Cifrar {
 			descifrado = true;
 		} catch (IOException localIOException) {
 			System.out.println("Proceso de descifrado incompleto");
-			System.out.println("Error de E/S.\n");
-			System.out.println("Comprueba que las ruta y credenciales son correctos");
+			System.out.println("Error de E/S.");
+			System.out.println("Comprueba que las ruta y credenciales son correctos\n");
 		} catch (Exception localException) {
 			System.out.println(localException.getMessage() + "\n");
 			localException.printStackTrace();
