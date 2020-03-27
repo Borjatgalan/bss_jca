@@ -97,7 +97,7 @@ public class Header {
 				if (i == MARKLENGTH) {
 					operation = buf[i++];
 					algorithm1 = Options.cipherAlgorithms[buf[i++]];
-					algorithm2 = Options.authenticationAlgorithms[buf[i++]];
+					//algorithm2 = Options.authenticationAlgorithms[buf[i++]];
 					int dataLength = (buf[i] > 0) ? buf[i] : (buf[i] + 256);
 					i++;
 					data = new byte[dataLength];
@@ -123,9 +123,9 @@ public class Header {
 			fos.write(MARK);
 			fos.write(operation);
 			fos.write(Options.search(Options.cipherAlgorithms, algorithm1));
-			fos.write(Options.search(Options.authenticationAlgorithms, algorithm2));
+			//fos.write(Options.search(Options.authenticationAlgorithms, algorithm2));
 			fos.write(data.length);
-			fos.write(data, 0, data.length);
+			//fos.write(data, 0, data.length);
 			fos.flush();
 			breturn = true;
 		} catch (Exception e) {

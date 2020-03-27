@@ -1,1 +1,1 @@
-/home/borja/eclipse-workspace/PracticaJCA/prueba.txt
+esto es una prueba del cifrado y descifrado simetrico

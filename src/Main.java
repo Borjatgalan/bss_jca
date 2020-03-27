@@ -25,21 +25,22 @@ public class Main {
 	public Main() {
 		this.opcion = new Scanner(System.in);
 		this.cf = new Cifrar();
-		this.passwd="";
+		this.passwd = "";
 	}
 
 	/**
-	 * Método que llama al cifrado por bloques con las entradas necesarias, también selecciona el
-	 * algoritmo de cifrado/descifrado y pide al usuario por pantalla la frase de paso comprobando
-	 * que se ha introducido 2 veces correctamente
-	 * Una vez cifrado mostrará un mensaje de confirmación al usuario 
+	 * Método que llama al cifrado por bloques con las entradas necesarias, también
+	 * selecciona el algoritmo de cifrado/descifrado y pide al usuario por pantalla
+	 * la frase de paso comprobando que se ha introducido 2 veces correctamente Una
+	 * vez cifrado mostrará un mensaje de confirmación al usuario
+	 * 
 	 * @return 0
 	 */
 	@SuppressWarnings("null")
 	public void cifrarFichero() {
-		String file = null, algorithm = null, passwd2="";
+		String file = null, algorithm = null, passwd2 = "";
 		Boolean enc = false;
-		Boolean equals=false;
+		Boolean equals = false;
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		try {
 			System.out.println("Introduzca el nombre del fichero que desea cifrar con la extension");
@@ -54,26 +55,26 @@ public class Main {
 				}
 			}
 
-			while(!equals) {
+			while (!equals) {
 				System.out.println("Introduzca su clave de paso: ");
 				passwd = br.readLine();
 				System.out.println("Vuelva a introducir la clave de paso: ");
 				passwd2 = br.readLine();
-				if(passwd.equals(passwd2)) {
-					equals=true;
-				}else{
-					equals=false;
+				if (passwd.equals(passwd2)) {
+					equals = true;
+				} else {
+					equals = false;
 					System.out.println("Las claves no coinciden, vuelva a intentarlo");
 
 				}
-				
-			}	
+
+			}
 
 			algorithm = menuAlgoritmo();
 			if (cf.cifrar(file, passwd.toCharArray(), algorithm)) {
-				System.out.println(
-						"Cifrado completado satisfactoriamente. puede encontrarlo como " +file+".cif Pulsa cualquier tecla para regresar al men� principal");
-	//			System.out.print("> ");
+				System.out.println("Cifrado completado satisfactoriamente. puede encontrarlo como " + file
+						+ ".cif Pulsa cualquier tecla para regresar al men� principal");
+				// System.out.print("> ");
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -82,22 +83,27 @@ public class Main {
 	}
 
 	/**
-	 * Método que llama al descifrado pidiendo al usuario por pantalla el nombre del fichero a descifrar
-	 * Una vez descifrado mostrará al usuario por pantalla una confirmación
+	 * Método que llama al descifrado pidiendo al usuario por pantalla el nombre del
+	 * fichero a descifrar Una vez descifrado mostrará al usuario por pantalla una
+	 * confirmación
+	 * 
 	 * @return 0
 	 */
 	public void descifrarFichero() {
-		String file = "";
+		String file = "", pwd = "";
 		String algorithm = "";
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Introduzca el nombre del fichero que desea descifrar con la extension");
 		try {
 			file = br.readLine();
-		if(	cf.descifrar(file, passwd.toCharArray(), algorithm)) {
-			System.out.println(
-					"Fichero descifrado, puede encontrarlo como "+file+".cla, si desea revisarlo puede cambiar la extension a .txt ");
-		//	System.out.println("=======================================================\n");
-		}
+			System.out.println("Introduzca la frase de paso");
+			pwd = br.readLine();
+
+			if (cf.descifrar(file, pwd.toCharArray(), algorithm)) {
+				System.out.println("Fichero descifrado, puede encontrarlo como " + file
+						+ ".cla, si desea revisarlo puede cambiar la extension a .txt ");
+				// System.out.println("=======================================================\n");
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -105,22 +111,20 @@ public class Main {
 	}
 
 	/**
-	 * Método para el menú de opciones
-	 * 0: salir
-	 * 1: cifrar
-	 * 2: descifrar
-	 * seguirá pidiendo opciones hasta que el usuario elija 0
+	 * Método para el menú de opciones 0: salir 1: cifrar 2: descifrar seguirá
+	 * pidiendo opciones hasta que el usuario elija 0
+	 * 
 	 * @return 0
 	 */
-	public void procesoPrincipal() throws IOException{
+	public void procesoPrincipal() throws IOException {
 		boolean esc = false;
 		int seleccion;
 		while (!esc) {
 			try {
 				seleccion = menuOpciones();
 				switch (seleccion) {
-				case 0: //salir
-					esc=true;
+				case 0: // salir
+					esc = true;
 					break;
 				case 1: // Cifrar fichero
 					cifrarFichero();
@@ -131,7 +135,7 @@ public class Main {
 
 				default:
 					System.out.println("Opcion incorrecta, vuelva a introducir otro valor (0-2)\n");
-			//		System.out.print(">");
+					// System.out.print(">");
 					break;
 				}
 			} catch (Exception e) {
@@ -142,12 +146,12 @@ public class Main {
 		System.out.println("...Fin del programa...");
 	}
 
-
 	/**
 	 * Metodo que muestra las opciones disponibles del programa
+	 * 
 	 * @return int op, opción elegida para el menú.
 	 */
-	public int menuOpciones() throws IOException{
+	public int menuOpciones() throws IOException {
 		int op;
 		System.out.println("===========================================================================");
 		System.out.println("Elija la operacion que desea realizar con el fichero:");
@@ -157,13 +161,14 @@ public class Main {
 		System.out.println("0. Salir");
 //		System.out.print("> ");
 		op = opcion.nextInt();
-		
+
 		return op;
 
 	}
 
 	/**
 	 * Setter de opcion
+	 * 
 	 * @param Scanner opcion
 	 * @return 0
 	 */
@@ -173,6 +178,7 @@ public class Main {
 
 	/**
 	 * Getter de opción
+	 * 
 	 * @return Scanner opcion
 	 */
 	public Scanner getOpcion() {
@@ -181,6 +187,7 @@ public class Main {
 
 	/**
 	 * Muestra los algoritmos de cifrado que se encuentran disponibles
+	 * 
 	 * @return 0
 	 */
 	public void mostrarAlgoritmosCifrado() {
@@ -193,6 +200,7 @@ public class Main {
 
 	/**
 	 * Metodo para la seleccion del algoritmo a utilizar
+	 * 
 	 * @param ninguno
 	 * @return String con el algoritmo elegido devuelto por la clase Options
 	 */
@@ -205,23 +213,23 @@ public class Main {
 		int entrada = opcion.nextInt();
 		switch (entrada) {
 		case 1:
-			alg = Options.symmetricalAlgorithms[entrada-1];
+			alg = Options.symmetricalAlgorithms[entrada - 1];
 			break;
 		case 2:
-			alg = Options.symmetricalAlgorithms[entrada-1];
+			alg = Options.symmetricalAlgorithms[entrada - 1];
 			break;
 		case 3:
-			alg = Options.symmetricalAlgorithms[entrada-1];
+			alg = Options.symmetricalAlgorithms[entrada - 1];
 			break;
 		case 4:
-			alg = Options.symmetricalAlgorithms[entrada-1];
+			alg = Options.symmetricalAlgorithms[entrada - 1];
 			break;
 		default:
 			System.out.println("ERROR en la seleccion del algoritmo de cifrado...");
 			System.out.println("Opcion seleccionada: " + entrada + "\n");
 			break;
 		}
-		System.out.println("Algoritmo seleccionado: " + Options.symmetricalAlgorithms[entrada-1]);
+		System.out.println("Algoritmo seleccionado: " + Options.symmetricalAlgorithms[entrada - 1]);
 
 		return alg;
 	}
@@ -249,7 +257,7 @@ public class Main {
 //	//	System.out.print("> ");
 //		int entrada = opcion.nextInt();
 //		switch (entrada) {
-//		case 1:
+//		case 1: 
 //			auth = Options.authenticationAlgorithms[entrada];
 //			break;
 //		case 2:
@@ -274,7 +282,7 @@ public class Main {
 //		return auth;
 //	}
 
-	public static void main(final String[] args) throws IOException{
+	public static void main(final String[] args) throws IOException {
 		Main main = new Main();
 		main.procesoPrincipal();
 	}
