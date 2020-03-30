@@ -74,7 +74,6 @@ public class Main {
 			if (cf.cifrar(file, passwd.toCharArray(), algorithm)) {
 				System.out.println("Cifrado completado satisfactoriamente. puede encontrarlo como " + file
 						+ ".cif Pulsa cualquier tecla para regresar al men� principal");
-				// System.out.print("> ");
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -135,7 +134,6 @@ public class Main {
 
 				default:
 					System.out.println("Opcion incorrecta, vuelva a introducir otro valor (0-2)\n");
-					// System.out.print(">");
 					break;
 				}
 			} catch (Exception e) {
@@ -159,7 +157,6 @@ public class Main {
 		System.out.println("1. Cifrado de fichero");
 		System.out.println("2. Descifrado de fichero");
 		System.out.println("0. Salir");
-//		System.out.print("> ");
 		op = opcion.nextInt();
 
 		return op;
@@ -209,7 +206,7 @@ public class Main {
 		// entrada por teclado del usuario
 		System.out.println("Seleccione un algoritmo de cifrado simétrico: ");
 		mostrarAlgoritmosCifrado();
-//		System.out.print("> ");
+
 		int entrada = opcion.nextInt();
 		switch (entrada) {
 		case 1:
@@ -233,54 +230,6 @@ public class Main {
 
 		return alg;
 	}
-
-//	/**
-//	 * Muestra por pantalla los algoritmos de autenticacion disponibles
-//	 * @return 0
-//	 */
-//	public void mostrarAlgoritmosAuth() {
-//		System.out.println("======================================================");
-//		System.out.println("1 : MD2");
-//		System.out.println("2 : MD5");
-//		System.out.println("3 : SHA-1");
-//		System.out.println("4 : SHA-256");
-//		System.out.println("5 : SHA-384");
-//	}
-//
-//	/**
-//	 * Metodo encargado de escoger el algoritmo de autenticacion
-//	 */
-//	public String menuAutenticacion() {
-//		String auth = "";
-//		System.out.println("Seleccione un algoritmo de autenticacion: ");
-//		mostrarAlgoritmosAuth();
-//	//	System.out.print("> ");
-//		int entrada = opcion.nextInt();
-//		switch (entrada) {
-//		case 1: 
-//			auth = Options.authenticationAlgorithms[entrada];
-//			break;
-//		case 2:
-//			auth = Options.authenticationAlgorithms[entrada];
-//			break;
-//		case 3:
-//			auth = Options.authenticationAlgorithms[entrada];
-//			break;
-//		case 4:
-//			auth = Options.authenticationAlgorithms[entrada];
-//			break;
-//		case 5:
-//			auth = Options.authenticationAlgorithms[entrada];
-//			break;
-//		default:
-//			System.out.println("ERROR en la seleccion...");
-//			System.out.println("Opcion seleccionada: " + entrada + "\n");
-//			break;
-//		}
-//		System.out.println("Algoritmo de autenticacion seleccionado: " + Options.authenticationAlgorithms[entrada]);
-//
-//		return auth;
-//	}
 
 	public static void main(final String[] args) throws IOException {
 		Main main = new Main();
