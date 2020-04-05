@@ -38,7 +38,7 @@ public class Main {
 	 */
 	@SuppressWarnings("null")
 	public void cifrarFichero() {
-		String file = null, algorithm = null, passwd2 = "";
+		String file = null, alg1 = null,alg2 = null, passwd2 = "";
 		Boolean enc = false;
 		Boolean equals = false;
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -67,13 +67,14 @@ public class Main {
 					System.out.println("Las claves no coinciden, vuelva a intentarlo");
 
 				}
-
 			}
 
-			algorithm = menuAlgoritmo();
-			if (cf.cifrar(file, passwd.toCharArray(), algorithm)) {
-				System.out.println("Cifrado completado satisfactoriamente. puede encontrarlo como " + file
-						+ ".cif Pulsa cualquier tecla para regresar al men� principal");
+			alg1 = menuAlgoritmo();
+			alg2 = Options.authenticationAlgorithms[0];
+			if (cf.cifrar(file, passwd.toCharArray(), alg1 , alg2)) {
+				System.out.println("-- Cifrado completado satisfactoriamente.\n"
+						+ "Puede encontrarlo como " + file
+						+ ".cif Pulsa cualquier tecla para regresar al menu principal");
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -82,7 +83,7 @@ public class Main {
 	}
 
 	/**
-	 * Método que llama al descifrado pidiendo al usuario por pantalla el nombre del
+	 * Metodo que llama al descifrado pidiendo al usuario por pantalla el nombre del
 	 * fichero a descifrar Una vez descifrado mostrará al usuario por pantalla una
 	 * confirmación
 	 * 
@@ -90,18 +91,20 @@ public class Main {
 	 */
 	public void descifrarFichero() {
 		String file = "", pwd = "";
-		String algorithm = "";
+		String alg1 = "", alg2 = "";
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Introduzca el nombre del fichero que desea descifrar con la extension");
 		try {
 			file = br.readLine();
 			System.out.println("Introduzca la frase de paso");
 			pwd = br.readLine();
-
-			if (cf.descifrar(file, pwd.toCharArray(), algorithm)) {
-				System.out.println("Fichero descifrado, puede encontrarlo como " + file
+			
+			alg1 = menuAlgoritmo();
+			alg2 = Options.authenticationAlgorithms[0];
+			if (cf.descifrar(file, pwd.toCharArray(), alg1, alg2)) {
+				System.out.println("-- Fichero descifrado satisfactoriamente.\n"
+						+ "Puede encontrarlo como " + file
 						+ ".cla, si desea revisarlo puede cambiar la extension a .txt ");
-				// System.out.println("=======================================================\n");
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -110,7 +113,7 @@ public class Main {
 	}
 
 	/**
-	 * Método para el menú de opciones 0: salir 1: cifrar 2: descifrar seguirá
+	 * Metodo para el menú de opciones 0: salir 1: cifrar 2: descifrar seguirá
 	 * pidiendo opciones hasta que el usuario elija 0
 	 * 
 	 * @return 0

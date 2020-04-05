@@ -3,9 +3,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
@@ -14,12 +11,20 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.SecretKeyFactory;
 
+/**
+ * Practica JCA
+ * 
+ * @author Gonzalo Bueno Rodriguez & Borja Alberto Tirado Galan
+ *
+ */
+
 //Clase SecureRandom para generar salt de manera aleatoria
 import java.security.SecureRandom;
 
 /*Clase encargada del cifrado y descifrado de ficheros*/
 public class Cifrar {
 	/* Atributos */
+
 	/* Salt: conjunto de datos aleatorios para incluir en la cabecera */
 	private byte[] salt;
 	/* Numero de iteraciones aplicadas a los algoritmos hash */
@@ -27,8 +32,8 @@ public class Cifrar {
 
 	/* Constructor por defecto de Cifrar */
 	public Cifrar() {
-		this.salt = generateRandomSalt(8);
-		this.count = 1024; 
+		this.salt = new byte[] { 0x0 };
+		this.count = 1024;
 	}
 
 	/**
@@ -82,26 +87,34 @@ public class Cifrar {
 	 * @param algorithm algoritmo de cifrado
 	 * @return True: cifrado satisfactorio. False: error en el cifrado
 	 */
-	public Boolean cifrar(String file, char[] passwd, String algorithm) {
+	public Boolean cifrar(String file, char[] passwd, String alg1, String alg2) {
 		Boolean cifrado = false;
-		System.out.println("Proceso de cifrado de <" + file + "> con Algoritmo: " + algorithm + "\n");
+		System.out.println("Proceso de cifrado de <" + file + "> con Algoritmo: " + alg1 + "\n");
 		try {
 			/* Flujo de entrada y salida */
-			FileInputStream fileIn = new FileInputStream(file);
-			FileOutputStream fileOut = new FileOutputStream(file + ".cif");
+			FileInputStream fis = new FileInputStream(file);
+			FileOutputStream fos = new FileOutputStream(file + ".cif");
+
 			/* Creacion de instancia Header */
-			Header header = new Header(algorithm, this.salt);
+			this.salt = generateRandomSalt(8);
+			Header header = new Header(Options.OP_SYMMETRIC_CIPHER, alg1, alg2, this.salt);
+			/* Generacion de la clave */
+			SecretKey secretKey = generarClaves(alg1, passwd);
+			/* Escritura de la cabecera del fichero */
+			header.save(fos);
+			/* Comprobacion del guardado de la cabecera*/
+			if (!testHeader(header, alg1, alg2, this.salt))
+				System.out.println("Error en el guardado de la cabecera");
 
 			/* Creacion del Cipher */
-			Cipher cipher = Cipher.getInstance(algorithm);
+			Cipher cipher = Cipher.getInstance(alg1);
 
-			/* Generacion de la clave */
-			SecretKey secretKey = generarClaves(algorithm, passwd);
 			/* Obtenemos los parametros PBE */
 			PBEParameterSpec pPS = new PBEParameterSpec(salt, this.count);
 			cipher.init(Cipher.ENCRYPT_MODE, secretKey, pPS);
-			CipherInputStream cis = new CipherInputStream(fileIn, cipher);
-			int i = 0;
+			CipherOutputStream cos = new CipherOutputStream(fos, cipher);
+
+			int i, j = 0;
 			byte[] array = new byte[1024];
 			/*
 			 * Nos permitirán cifrar/descifrar un flujo de datos con el Cipher anterior. Una
@@ -109,19 +122,19 @@ public class Cifrar {
 			 * cifrando o descifrando los datos
 			 */
 
-			/* Escritura de la cabecera del fichero */
-			header.save(fileOut);
-
-			while ((i = cis.read(array)) != -1) {
-				fileOut.write(array, 0, i);
+			while ((i = fis.read(array)) != -1) {
+				cos.write(array, 0, i);
+				j += i;
+				System.out.print(i + ".");
 			}
 
+			System.out.println("\nCifrado: " + j + "\n");
 			/* Cierre de flujos */
-			cis.close();
+			cos.flush();
+			cos.close();
 
-			fileOut.close();
-			fileOut.flush();
-			fileIn.close();
+			fos.close();
+			fis.close();
 			cifrado = true;
 		} catch (FileNotFoundException FileNotFoundException) {
 			System.out.println("Fichero no encontrado: " + file + "\n");
@@ -132,6 +145,20 @@ public class Cifrar {
 		}
 		return cifrado;
 	}
+	/**
+	 * Metodo que comprueba los datos de la cabecera
+	 * @param header Instancia cabecera
+	 * @param alg1 Algoritmo de cifrado
+	 * @param alg2 Algoritmo de comprobacion
+	 * @param salt2 Salt
+	 * @return Devuelve verdadero si todos los datos coinciden, falso en caso contrario
+	 */
+	private Boolean testHeader(Header header, String alg1, String alg2, byte[] salt2) {
+		if (alg1 == header.getAlgorithm1() && alg2 == header.getAlgorithm2() && salt2 == header.getData())
+			return true;
+
+		return false;
+	}
 
 	/**
 	 * Clase encargada de realizar el proceso de descifrado
@@ -141,50 +168,49 @@ public class Cifrar {
 	 * @param algorithm algoritmo de descifrado
 	 * @return True: descifrado satisfactorio. False: error en el descifrado
 	 */
-	public final Boolean descifrar(String file, char[] passwd, String algorithm) {
+	public final Boolean descifrar(String file, char[] passwd, String alg1, String alg2) {
 		Boolean descifrado = false;
 		try {
 			System.out.println("Proceso de descifrado de <" + file + ">\n");
 			/* Flujos de lectura y escritura */
-			FileInputStream fileIn = new FileInputStream(file);
-			FileOutputStream ficherOut = new FileOutputStream(file + ".cla");
-
-			/* Creacion de instancia Header */
-			Header header = new Header();
-
-			/* Lectura de la cabecera del fichero */
-			header.load(fileIn);
-			algorithm = header.getAlgorithm1();
-			salt = header.getData();
-
-			/* getInstance de Cipher */
-			Cipher cipher = Cipher.getInstance(header.getAlgorithm1());
+			FileInputStream fis = new FileInputStream(file);
+			FileOutputStream fos = new FileOutputStream(file + ".cla");
 
 			/* Obtencion de la clave */
-			SecretKey secretKey = generarClaves(header.getAlgorithm1(), passwd);
-			/* Parametros PBE */
-
+			SecretKey secretKey = generarClaves(alg1, passwd);
+			/* Creacion de instancia Header */
+			Header header = new Header();
+			/* Lectura de la cabecera del fichero */
+			header.load(fis);
+			/* Comprobacion de la carga de la cabecera*/
+			if (!testHeader(header, alg1, alg2, this.salt))
+				System.out.println("Error en la carga de la cabecera");
+			
+			/* getInstance de Cipher */
+			Cipher cipher = Cipher.getInstance(alg1);
 			PBEParameterSpec pPS = new PBEParameterSpec(header.getData(), this.count);
 			cipher.init(Cipher.DECRYPT_MODE, secretKey, pPS);
-			CipherOutputStream cos = new CipherOutputStream(ficherOut, cipher);
+
+			CipherInputStream cis = new CipherInputStream(fis, cipher);
 
 			byte[] array = new byte[1024];
-			int i;
+			int i, j = 0;
 			/* Escritura del fichero de los bloques obtenidos */
-			while ((i = fileIn.read(array)) > 0) {
-				cos.write(array, 0, i);
+			while ((i = cis.read(array)) > 0) {
+				fos.write(array, 0, i);
+				j += i;
+				System.out.print(i + ".");
 			}
-
+			System.out.println("\nDescifrado: " + j + "\n");
 			/* Cierre de flujos */
-			cos.close();
-			fileIn.close();
-			ficherOut.flush();
-			ficherOut.close();
+			cis.close();
+			fis.close();
+			fos.close();
 			descifrado = true;
 		} catch (IOException localIOException) {
-			System.out.println("Proceso de descifrado incompleto");
-			System.out.println("Error de E/S.");
-			System.out.println("Comprueba que las ruta y credenciales son correctos\n");
+			System.out.println("\n[x] Proceso de descifrado incompleto: ");
+			System.out.println("\n[x] 	Error de E/S.");
+			System.out.println("\n[x] 	Comprueba que la ruta y credenciales son correctos\n");
 		} catch (Exception localException) {
 			System.out.println(localException.getMessage() + "\n");
 			localException.printStackTrace();
