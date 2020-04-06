@@ -20,6 +20,7 @@ import javax.crypto.SecretKeyFactory;
 
 //Clase SecureRandom para generar salt de manera aleatoria
 import java.security.SecureRandom;
+import java.util.Arrays;
 
 /*Clase encargada del cifrado y descifrado de ficheros*/
 public class Cifrar {
@@ -95,7 +96,7 @@ public class Cifrar {
 			FileInputStream fis = new FileInputStream(file);
 			FileOutputStream fos = new FileOutputStream(file + ".cif");
 
-			/* Creacion de instancia Header */
+			/* Creacion de instancia Header con campos iniciados*/
 			this.salt = generateRandomSalt(8);
 			Header header = new Header(Options.OP_SYMMETRIC_CIPHER, alg1, alg2, this.salt);
 			/* Generacion de la clave */
@@ -105,6 +106,7 @@ public class Cifrar {
 			/* Comprobacion del guardado de la cabecera*/
 			if (!testHeader(header, alg1, alg2, this.salt))
 				System.out.println("Error en el guardado de la cabecera");
+			System.out.println("SALT usado: "+Arrays.toString(this.salt));
 
 			/* Creacion del Cipher */
 			Cipher cipher = Cipher.getInstance(alg1);
@@ -125,12 +127,12 @@ public class Cifrar {
 			while ((i = fis.read(array)) != -1) {
 				cos.write(array, 0, i);
 				j += i;
-				System.out.print(i + ".");
+				System.out.print("Leidos " +i + " bytes del fichero");
 			}
 
-			System.out.println("\nCifrado: " + j + "\n");
+			System.out.println("\nCifrados " + j + " bytes\n");
 			/* Cierre de flujos */
-			cos.flush();
+//			cos.flush();
 			cos.close();
 
 			fos.close();
@@ -168,7 +170,7 @@ public class Cifrar {
 	 * @param algorithm algoritmo de descifrado
 	 * @return True: descifrado satisfactorio. False: error en el descifrado
 	 */
-	public final Boolean descifrar(String file, char[] passwd, String alg1, String alg2) {
+	public final Boolean descifrar(String file, char[] passwd) {
 		Boolean descifrado = false;
 		try {
 			System.out.println("Proceso de descifrado de <" + file + ">\n");
@@ -176,18 +178,21 @@ public class Cifrar {
 			FileInputStream fis = new FileInputStream(file);
 			FileOutputStream fos = new FileOutputStream(file + ".cla");
 
-			/* Obtencion de la clave */
-			SecretKey secretKey = generarClaves(alg1, passwd);
 			/* Creacion de instancia Header */
 			Header header = new Header();
 			/* Lectura de la cabecera del fichero */
 			header.load(fis);
-			/* Comprobacion de la carga de la cabecera*/
-			if (!testHeader(header, alg1, alg2, this.salt))
-				System.out.println("Error en la carga de la cabecera");
+			/* Comprobacion de los datos leídos de la cabecera*/
+			System.out.println("El fichero se encuentra cifrado con el algoritmo "
+					+header.getAlgorithm1()+", obtenido de la cabecera");
 			
+			System.out.println("SALT obtenido de la cabecera: "+Arrays.toString(header.getData()));
+			
+			/* Obtencion de la clave */
+			SecretKey secretKey = generarClaves(header.getAlgorithm1(), passwd);
+		
 			/* getInstance de Cipher */
-			Cipher cipher = Cipher.getInstance(alg1);
+			Cipher cipher = Cipher.getInstance(header.getAlgorithm1());
 			PBEParameterSpec pPS = new PBEParameterSpec(header.getData(), this.count);
 			cipher.init(Cipher.DECRYPT_MODE, secretKey, pPS);
 
@@ -199,13 +204,13 @@ public class Cifrar {
 			while ((i = cis.read(array)) > 0) {
 				fos.write(array, 0, i);
 				j += i;
-				System.out.print(i + ".");
 			}
-			System.out.println("\nDescifrado: " + j + "\n");
+			System.out.println("Descifrados " + j + " bytes\n");
+			
 			/* Cierre de flujos */
 			cis.close();
-			fis.close();
 			fos.close();
+			fis.close();
 			descifrado = true;
 		} catch (IOException localIOException) {
 			System.out.println("\n[x] Proceso de descifrado incompleto: ");

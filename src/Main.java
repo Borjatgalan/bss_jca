@@ -74,7 +74,7 @@ public class Main {
 			if (cf.cifrar(file, passwd.toCharArray(), alg1 , alg2)) {
 				System.out.println("-- Cifrado completado satisfactoriamente.\n"
 						+ "Puede encontrarlo como " + file
-						+ ".cif Pulsa cualquier tecla para regresar al menu principal");
+						+ ".cif");
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -91,7 +91,6 @@ public class Main {
 	 */
 	public void descifrarFichero() {
 		String file = "", pwd = "";
-		String alg1 = "", alg2 = "";
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Introduzca el nombre del fichero que desea descifrar con la extension");
 		try {
@@ -99,12 +98,11 @@ public class Main {
 			System.out.println("Introduzca la frase de paso");
 			pwd = br.readLine();
 			
-			alg1 = menuAlgoritmo();
-			alg2 = Options.authenticationAlgorithms[0];
-			if (cf.descifrar(file, pwd.toCharArray(), alg1, alg2)) {
-				System.out.println("-- Fichero descifrado satisfactoriamente.\n"
+			if (cf.descifrar(file, pwd.toCharArray())) {
+				System.out.println("-- Fichero descifrado satisfactoriamente."+"\n"
 						+ "Puede encontrarlo como " + file
-						+ ".cla, si desea revisarlo puede cambiar la extension a .txt ");
+						+ ".cla, si desea revisarlo en el explorador del S.O."
+						+ " puede cambiar la extension a .txt ");
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
